@@ -1,14 +1,14 @@
-from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import json
-
+import os
+ap_key: str = os.getenv('API_KEY')
 class Channel:
     _service = None
 
     def __init__(self, channel_id):
         self._channel_id = channel_id
 
-        youtube = self.get_service()
+        youtube = self.get_service("AIzaSyCzMK1RWR_MA4E9fxm4BmlhSjpUbnXyXzc")
         request = youtube.channels().list(
             part="snippet,statistics",
             id=channel_id
@@ -24,12 +24,10 @@ class Channel:
         self._view_count = int(item['statistics']['viewCount'])
 
     @classmethod
-    def get_service(cls):
-        if not cls._service:
-            credentials = Credentials.from_authorized_user_file('kuplinov.json',
-                                                                ['https://www.googleapis.com/auth/youtube.readonly'])
-            cls._service = build('youtube', 'v3', credentials=credentials)
-        return cls._service
+    def get_service(cls, api_key):
+        api_key = os.getenv('API_KEY')
+        return build('youtube', 'v3', developerKey=api_key)
+
 
     @property
     def channel_id(self):
