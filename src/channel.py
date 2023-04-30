@@ -8,7 +8,7 @@ class Channel:
     def __init__(self, channel_id):
         self._channel_id = channel_id
 
-        youtube = self.get_service("AIzaSyCzMK1RWR_MA4E9fxm4BmlhSjpUbnXyXzc")
+        youtube = self.get_service(os.getenv('API_KEY'))
         request = youtube.channels().list(
             part="snippet,statistics",
             id=channel_id
