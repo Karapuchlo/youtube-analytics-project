@@ -8,7 +8,7 @@ class Channel:
     def __init__(self, channel_id):
         self._channel_id = channel_id
 
-        youtube = self.get_service(os.getenv('API_KEY'))
+        youtube = self.get_service()
         request = youtube.channels().list(
             part="snippet,statistics",
             id=channel_id
@@ -24,10 +24,28 @@ class Channel:
         self._view_count = int(item['statistics']['viewCount'])
 
     @classmethod
-    def get_service(cls, api_key):
-        api_key = os.getenv('API_KEY')
-        return build('youtube', 'v3', developerKey=api_key)
+    def get_service(self):
+        return build('youtube', 'v3', developerKey=ap_key)
 
+    def __str__(self):
+        return f"{self._title} ({self._url})"
+
+    def __add__(self, other):
+        if isinstance(other, Channel):
+            return self._subscribers + other._subscribers
+
+    def __sub__(self, other):
+        if isinstance(other, Channel):
+            return self._subscribers - other._subscribers
+
+    def __lt__(self, other):
+        return self._subscribers < other._subscribers
+
+    def __gt__(self, other):
+        return self._subscribers > other._subscribers
+
+    def __eq__(self, other):
+        return self._subscribers == other._subscribers
 
     @property
     def channel_id(self):

@@ -16,5 +16,5 @@ if __name__ == '__main__':
     print(Channel.get_service())
     # <googleapiclient.discovery.Resource object at 0x000002B1E54F9750>
 
-    # создаем файл 'kuplinov.json' в данными по каналу
+    # создаем файл 'kuplinov.json' с данными по каналу
     kuplinov.to_json('kuplinov.json')
