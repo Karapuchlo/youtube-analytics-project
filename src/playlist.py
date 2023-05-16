@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import os
 from googleapiclient.discovery import build
 class PlayList:
@@ -6,7 +6,8 @@ class PlayList:
         self.playlist_id = playlist_id
         # Получение названия и URL плейлиста, например, используя YouTube API:
         self.title = self.get_playlist_title()
-        self.url = self.get_playlist_videos()
+        self.url = f'https://www.youtube.com/playlist?list={self.playlist_id}'
+        self.videos = self.get_playlist_videos()
 
     def get_playlist_videos(self):
         api_key = os.getenv('API_KEY')
@@ -41,32 +42,34 @@ class PlayList:
         youtube = build('youtube', 'v3', developerKey=api_key)
         metadata = []
         for i in range(0, len(video_ids), 50):
-            videos = youtube.videos().list(id=','.join(video_ids[i:i + 50]), part='snippet').execute()
+            videos = youtube.videos().list(id=','.join(video_ids[i:i + 50]), part='snippet,contentDetails').execute()
 
             for video in videos['items']:
                 video_id = video['id']
                 title = video['snippet']['title']
                 thumbnail = video['snippet']['thumbnails']['high']['url']
+                duration = video['contentDetails']['duration']
                 url = f'https://www.youtube.com/watch?v={video_id}'
-                metadata.append({'id': video_id, 'title': title, 'thumbnail': thumbnail, 'url': url})
+                metadata.append({'id': video_id, 'title': title, 'thumbnail': thumbnail, 'url': url, 'duration': duration})
 
         return metadata
 
     @property
     def total_duration(self):
-        d = datetime.timedelta()
+        total = timedelta()
         for video in self.videos:
-            d += video.duration
-        return d
+            duration = datetime.strptime(video['duration'], "PT%MM%SS") - datetime(1900, 1, 1)
+            total += timedelta(minutes=duration.total_seconds() // 60, seconds=duration.total_seconds() % 60)
+        return total
 
     def show_best_video(self):
         best_video = None
         max_likes = 0
         for video in self.videos:
-            if video.likes > max_likes:
-                best_video = video
-                max_likes = video.likes
-        return best_video.url
+            if video.get('likes', 0) > max_likes:
+                max_likes = video['likes']
+                best_video = video['link']
+        return best_video
 
     def __str__(self):
         return f"{self.title}"
