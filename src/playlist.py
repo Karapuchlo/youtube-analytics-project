@@ -42,7 +42,7 @@ class PlayList:
         youtube = build('youtube', 'v3', developerKey=api_key)
         metadata = []
         for i in range(0, len(video_ids), 50):
-            videos = youtube.videos().list(id=','.join(video_ids[i:i + 50]), part='snippet,contentDetails').execute()
+            videos = youtube.videos().list(id=','.join(video_ids[i:i + 50]), part='snippet,contentDetails, statistics').execute()
 
             for video in videos['items']:
                 video_id = video['id']
@@ -50,7 +50,8 @@ class PlayList:
                 thumbnail = video['snippet']['thumbnails']['high']['url']
                 duration = video['contentDetails']['duration']
                 url = f'https://www.youtube.com/watch?v={video_id}'
-                metadata.append({'id': video_id, 'title': title, 'thumbnail': thumbnail, 'url': url, 'duration': duration})
+                likes = video['statistics']['likeCount']
+                metadata.append({'id': video_id, 'title': title, 'thumbnail': thumbnail, 'url': url, 'duration': duration, 'likes': likes})
 
         return metadata
 
@@ -66,9 +67,9 @@ class PlayList:
         best_video = None
         max_likes = 0
         for video in self.videos:
-            if video.get('likes', 0) > max_likes:
+            if int(video.get('likes', 0)) > int(max_likes):
                 max_likes = video['likes']
-                best_video = video['link']
+                best_video = video['url']
         return best_video
 
     def __str__(self):
